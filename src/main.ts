@@ -3,7 +3,6 @@ import { Telegraf } from "telegraf";
 
 import { BOT_TOKEN } from "./utils/config";
 
-const token = "5731721065:AAHKxQX_Wi8qM0efQH7BFvT0UdSy8klWUro";
 const bot = new Telegraf(BOT_TOKEN as string);
 
 const controller = new CommandsController();
