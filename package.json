@@ -18,7 +18,9 @@
   "scripts": {
     "build": "tsc --incremental",
     "start:watch": "ts-node-dev --respawn -- src/main.ts",
-    "start": "npx ts-node src/main.ts"
+    "start": "npx ts-node src/main.ts",
+    "tsc": "tsc",
+    "start:prod": "node build/server.js"
   },
   "keywords": [],
   "author": "BeyondeLimit",

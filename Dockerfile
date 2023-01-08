@@ -1,4 +1,8 @@
 FROM node:18
+WORKDIR /app
+COPY ./build /build
+COPY ./package.json /package.json
+COPY ./package-lock.json /package-lock.json
+RUN npm install
 COPY . .
-CMD npm run start
-EXPOSE 8081
+CMD ["node", "build/main.js"]
