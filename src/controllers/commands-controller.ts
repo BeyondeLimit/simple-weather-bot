@@ -1,5 +1,5 @@
+import type { Update } from "@telegraf/types";
 import { Context, Markup, NarrowedContext } from "telegraf";
-import { Update } from "typegram";
 import { WeatherFindingService } from "../services/weather-finding-service";
 import { Message } from "telegraf/typings/core/types/typegram";
 import { BotInformationService } from "../services/bot-information-service";
@@ -32,5 +32,11 @@ export class CommandsController {
     public handleStart = async (context: Context<Update>) => {
         const message = this.botInformationService.getWelcomeText();
         context.reply(message);
+    }
+
+    public getTodaysMarketSuggestion = async (ctx: Context<Update>) => {
+        console.log("Asked for today's suggestion");
+        const args = ctx.text?.replace(/^\/today(@\S+)?\s*/i, "").trim();
+        ctx.reply(args ?? "", Markup.removeKeyboard());
     }
 }

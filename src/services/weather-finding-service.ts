@@ -1,4 +1,4 @@
-import { IWeatherResponse } from "../../models/i-weather-response";
+import { IWeatherResponse } from "../models/i-weather-response";
 import { APIOneCallWeather } from "../api/api-one-call";
 import { Location } from "telegraf/typings/core/types/typegram";
 

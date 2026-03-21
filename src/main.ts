@@ -11,7 +11,8 @@ bot.start(controller.handleStart);
 
 bot.command("weather", controller.requestLocation);
 
-bot.on("location", controller.getWeatherByLocation);
+bot.command("today", controller.getTodaysMarketSuggestion);
+
 
 bot.launch();
 

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { API_ENDPOINT } from '../utils/config';
 import { Location } from "telegraf/typings/core/types/typegram";
-import { IWeatherResponse } from '../../models/i-weather-response';
+import { IWeatherResponse } from '../models/i-weather-response';
 
 
 export class APIOneCallWeather {
