@@ -7,12 +7,18 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { GroqService } from "../services/groq-service";
 import { buildTelegramMarketPrompt } from "../prompts/telegram-llm-prompt";
 import { replyTelegramHtml } from "../utils/reply-telegram-html";
+import { PromptsService } from "../services/prompts-service";
 
 export class CommandsController {
 
     private weatherFindingService = new WeatherFindingService();
     private botInformationService = new BotInformationService();
     private groqService = new GroqService();
+    private promptsService: PromptsService;
+
+    constructor(promptsService: PromptsService) {
+        this.promptsService = promptsService;
+    }
 
     public requestLocation = async (context: Context<Update>) => {
         context.reply(
@@ -78,4 +84,62 @@ export class CommandsController {
         const response = await this.groqService.getWelcomeMessage(prompt);
         await replyTelegramHtml(ctx, response);
     }
+
+    public savePrompt = async (ctx: Context<Update>) => {
+        const userId = String(ctx.from?.id);
+        const args = ctx.text?.replace(/^\/save(@\S+)?\s*/i, "").trim() ?? "";
+        if (args.length === 0) {
+            await ctx.reply("Usage: <code>/save VOO</code>", { parse_mode: "HTML" });
+            return;
+        }
+        const saved = await this.promptsService.savePrompt(userId, args);
+        const name = args.toUpperCase();
+        await ctx.reply(
+            saved ? `Saved <code>${name}</code>.` : `<code>${name}</code> is already in your list.`,
+            { parse_mode: "HTML" },
+        );
+    };
+
+    public listPrompts = async (ctx: Context<Update>) => {
+        const userId = String(ctx.from?.id);
+        const prompts = await this.promptsService.listPrompts(userId);
+        if (prompts.length === 0) {
+            await ctx.reply("Your list is empty. Use /save to add ETFs.");
+            return;
+        }
+        const buttons = prompts.map((p) => [Markup.button.callback(p, `etf:${p}`)]);
+        await ctx.reply("Your saved ETFs — tap one to analyse:", Markup.inlineKeyboard(buttons));
+    };
+
+    public deleteMenu = async (ctx: Context<Update>) => {
+        const userId = String(ctx.from?.id);
+        const prompts = await this.promptsService.listPrompts(userId);
+        if (prompts.length === 0) {
+            await ctx.reply("Your list is empty.");
+            return;
+        }
+        const buttons = prompts.map((p) => [Markup.button.callback(p, `del:${p}`)]);
+        await ctx.reply("Tap an ETF to delete it:", Markup.inlineKeyboard(buttons));
+    };
+
+    public handleEtfAction = async (ctx: Context<Update>) => {
+        await ctx.answerCbQuery();
+        const data = (ctx.callbackQuery as { data?: string })?.data ?? "";
+        const etfName = data.replace(/^etf:/, "");
+        const prompt = buildTelegramMarketPrompt(etfName);
+        const response = await this.groqService.getWelcomeMessage(prompt);
+        await replyTelegramHtml(ctx, response);
+    };
+
+    public handleDeleteAction = async (ctx: Context<Update>) => {
+        const data = (ctx.callbackQuery as { data?: string })?.data ?? "";
+        const etfName = data.replace(/^del:/, "");
+        await ctx.answerCbQuery();
+        const userId = String(ctx.from?.id);
+        const deleted = await this.promptsService.deletePrompt(userId, etfName);
+        await ctx.editMessageText(
+            deleted ? `Deleted <code>${etfName}</code>.` : `<code>${etfName}</code> not found.`,
+            { parse_mode: "HTML" },
+        );
+    };
 }
