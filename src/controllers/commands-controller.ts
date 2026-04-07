@@ -107,8 +107,11 @@ export class CommandsController {
             await ctx.reply("Your list is empty. Use /save to add ETFs.");
             return;
         }
-        const buttons = prompts.map((p) => [Markup.button.callback(p, `etf:${p}`)]);
-        await ctx.reply("Your saved ETFs — tap one to analyse:", Markup.inlineKeyboard(buttons));
+        const buttons = prompts.map((p) => [Markup.button.text(`/etf ${p}`)]);
+        await ctx.reply(
+            "Your saved ETFs — tap one to send the query:",
+            Markup.keyboard(buttons).oneTime().resize(),
+        );
     };
 
     public deleteMenu = async (ctx: Context<Update>) => {
@@ -120,15 +123,6 @@ export class CommandsController {
         }
         const buttons = prompts.map((p) => [Markup.button.callback(p, `del:${p}`)]);
         await ctx.reply("Tap an ETF to delete it:", Markup.inlineKeyboard(buttons));
-    };
-
-    public handleEtfAction = async (ctx: Context<Update>) => {
-        await ctx.answerCbQuery();
-        const data = (ctx.callbackQuery as { data?: string })?.data ?? "";
-        const etfName = data.replace(/^etf:/, "");
-        const prompt = buildTelegramMarketPrompt(etfName);
-        const response = await this.groqService.getWelcomeMessage(prompt);
-        await replyTelegramHtml(ctx, response);
     };
 
     public handleDeleteAction = async (ctx: Context<Update>) => {

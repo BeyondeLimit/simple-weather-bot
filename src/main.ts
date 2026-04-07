@@ -25,7 +25,6 @@ bot.command("save", controller.savePrompt);
 bot.command("list", controller.listPrompts);
 bot.command("delete", controller.deleteMenu);
 
-bot.action(/^etf:(.+)$/, controller.handleEtfAction);
 bot.action(/^del:(.+)$/, controller.handleDeleteAction);
 
 connectDatabase()
